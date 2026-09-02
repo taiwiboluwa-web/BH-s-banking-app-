@@ -1,20 +1,15 @@
-import { router, json, error, db } from '@appdeploy/sdk';
-import { requireAuth } from '@appdeploy/sdk';
-
-type Transfer = { userId: string; recipient: string; amount: number; currency: string; createdAt: string; status: string };
-
+import { router, json, error } from '@appdeploy/sdk';
+import { neon } from '@neondatabase/serverless';
+import { signup, verifyOtp, login, resendOtp, me, logout } from './auth';
+async function getSessionUser(token: string) { if (!token) throw new Error('Authentication required'); return me(token); }
+function sessionFrom(ctx: { body: unknown; query: Record<string,string> }) { const body=(ctx.body||{}) as Record<string,unknown>; return String(body.sessionToken||ctx.query.sessionToken||''); }
 export const handler = router({
-  'GET /api/health': [async () => json({ ok: true, app: "BH'S", mode: 'sandbox' })],
-  'GET /api/transactions': [requireAuth(), async (ctx) => {
-    const result = await db.list<Transfer>(`transactions:${ctx.user!.userId}`, { limit: 50 });
-    return json(result.items);
-  }],
-  'POST /api/transfers': [requireAuth(), async (ctx) => {
-    const body = ctx.body as Partial<Transfer>;
-    if (!body.recipient || !body.amount || Number(body.amount) <= 0) return error('Recipient and positive amount are required', 400);
-    const record: Transfer = { userId: ctx.user!.userId, recipient: String(body.recipient), amount: Number(body.amount), currency: String(body.currency || 'NGN'), createdAt: new Date().toISOString(), status: 'completed' };
-    const [id] = await db.add(`transactions:${ctx.user!.userId}`, [record]);
-    if (!id) return error('Unable to create transfer', 500);
-    return json({ id, ...record }, 201);
-  }],
+  'GET /api/health': [async () => json({ ok:true, app:"BH'S", mode:'sandbox' })],
+  'POST /api/auth/signup': [async (ctx) => { try { return json(await signup((ctx.body||{}) as Record<string,unknown>),201); } catch(e) { return error(e instanceof Error?e.message:'Unable to create account',400); } }],
+  'POST /api/auth/verify-otp': [async (ctx) => { try { const b=(ctx.body||{}) as Record<string,unknown>; return json(await verifyOtp(String(b.email||''),String(b.otp||''))); } catch(e) { return error(e instanceof Error?e.message:'Unable to verify code',400); } }],
+  'POST /api/auth/login': [async (ctx) => { try { const b=(ctx.body||{}) as Record<string,unknown>; return json(await login(String(b.email||''),String(b.password||''))); } catch(e) { return error(e instanceof Error?e.message:'Unable to sign in',401); } }],
+  'POST /api/auth/resend': [async (ctx) => { try { const b=(ctx.body||{}) as Record<string,unknown>; return json(await resendOtp(String(b.email||''))); } catch(e) { return error(e instanceof Error?e.message:'Unable to resend code',400); } }],
+  'POST /api/auth/me': [async (ctx) => { try { return json(await getSessionUser(sessionFrom(ctx))); } catch(e) { return error(e instanceof Error?e.message:'Session expired',401); } }],
+  'POST /api/auth/logout': [async (ctx) => { try { return json(await logout(sessionFrom(ctx))); } catch { return error('Unable to sign out',400); } }],
+  'POST /api/transfers': [async (ctx) => { try { const b=(ctx.body||{}) as Record<string,unknown>; const auth=await getSessionUser(String(b.sessionToken||'')); const recipient=String(b.recipient||'').trim(); const amount=Number(b.amount); if(!recipient||!Number.isFinite(amount)||amount<=0)return error('Recipient and positive amount are required',400); const url=process.env.NEON_DATABASE_URL; if(!url)return error('Neon database is not configured',503); const sql=neon(url); const id=crypto.randomUUID(); const createdAt=new Date().toISOString(); const currency=String(b.currency||'NGN'); await sql`CREATE TABLE IF NOT EXISTS public.bhs_transactions (id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES public.bhs_users(id) ON DELETE CASCADE, recipient text NOT NULL, amount numeric NOT NULL, currency text NOT NULL, created_at timestamptz NOT NULL, status text NOT NULL)`; await sql`INSERT INTO public.bhs_transactions (id,user_id,recipient,amount,currency,created_at,status) VALUES (${id},${auth.user.id},${recipient},${amount},${currency},${createdAt},'completed')`; return json({id,userId:auth.user.id,recipient,amount,currency,createdAt,status:'completed'},201); } catch(e) { return error(e instanceof Error?e.message:'Unable to create transfer',401); } }],
 });
