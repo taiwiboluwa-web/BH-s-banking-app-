@@ -6,7 +6,10 @@ const apiClient = fileURLToPath(new URL('./src/api.js', import.meta.url));
 
 export default defineConfig({
     plugins: [react()],
-    base: './',
+    // Vercel serves the SPA from the domain root. Absolute asset URLs keep
+    // JS/CSS/images working after client-side navigation and hard refreshes
+    // on routes such as /login and /dashboard.
+    base: '/',
     resolve: {
         alias: {
             '@appdeploy/client': apiClient,
