@@ -12,19 +12,30 @@ Steps:
 5. Continue to review and confirm the sandbox transfer
 Expected: A review step shows recipient, amount, currency and sandbox status; after confirmation the result is successful, the balance decreases by ₦25,000, and a new Transfer sent activity entry for Ada Nwosu appears.
 
-## Test 2 - Use the Nigerian service hub
+## Test 2 - Complete Nigerian service requests
 Viewport: mobile (375x667)
-Covers: Airtime, Data, Electricity, TV, International and Multi-currency service entry points, thumb-friendly quick actions
-Description: Verifies everyday Nigerian fintech services are discoverable from Home without pretending external billers are connected.
+Covers: Airtime, Data, Electricity, TV forms, required-field validation, review/result states, visible Activity records, sandbox provider boundary
+Description: Verifies the four Nigerian service shortcuts are actual interactive flows rather than dead notices.
 Steps:
-1. Open Home
-2. Tap Data
-3. Tap Electricity
-4. Tap TV
-5. Tap International
-Expected: Each service opens a clear BH'S flow notice or surface that identifies the feature and, where relevant, states it is sandbox/unavailable until a provider is connected.
+1. Open Home and tap Airtime
+2. Enter phone "08012345678", choose MTN, enter "5000", review and confirm
+3. Open Data, enter phone "08012345678", choose Airtel, select a data plan, review and confirm
+4. Open Electricity, choose Ikeja Electric, select Prepaid, enter meter "1234567890", enter "10000", review and confirm
+5. Open TV, choose DStv, enter IUC "1234567890", choose Compact, review and confirm
+Expected: Each service opens a usable form, validates required inputs, shows a review step, then records a processing sandbox transaction in Activity. No provider is charged.
 
-## Test 3 - Manage wallets and Safe & Spend
+## Test 3 - Use international transfer and multi-currency conversion
+Viewport: mobile (375x667)
+Covers: International transfer form/review/result, destination and recipient capture, multi-currency from/to/amount, conversion preview, Activity records
+Description: Verifies the two previously dead service buttons now open complete sandbox journeys.
+Steps:
+1. Open Home and tap International
+2. Choose United Kingdom, enter recipient "Jane Smith", enter "50000", review and confirm
+3. Tap Multi-currency
+4. Choose NGN to USD, enter "50000", review and confirm
+Expected: Both services open forms with editable fields, show a review step, then a result state and add a visible Activity record marked processing/sandbox.
+
+## Test 4 - Manage wallets and Safe & Spend
 Viewport: desktop (1280x800)
 Covers: NGN/USD/GBP/EUR wallet views, add/withdraw/convert entry points, Safe & Spend separation
 Description: Verifies the Wallet area presents multi-currency balances and production-shaped wallet controls without claiming live FX settlement.
@@ -35,7 +46,7 @@ Steps:
 4. Select Convert
 Expected: Wallet balances and Safe & Spend controls are visible, and Convert is clearly presented as a sandbox/future-provider action.
 
-## Test 4 - Review cards, activity detail and More security surfaces
+## Test 5 - Review cards, activity detail and More security surfaces
 Viewport: desktop (1280x800)
 Covers: virtual card, freeze/unfreeze controls, spending controls, searchable/filterable activity, transaction detail, receipt summary, More/Profile/Security/KYC/Support/Settings
 Description: Verifies the major product surfaces are reachable and useful from the five-area navigation model.
@@ -49,7 +60,7 @@ Steps:
 7. Open Security centre
 Expected: Card controls, activity search, transaction detail/receipt summary, and security/profile/KYC/support/settings entry points are visible and navigable without errors.
 
-## Test 5 - Block invalid transfer and show safe failure state
+## Test 6 - Block invalid transfer and show safe failure state
 Viewport: mobile (375x667)
 Covers: transfer validation guardrail, insufficient-balance protection, failed-state presentation, invalid-write prevention
 Description: Verifies unsafe or invalid money movement is stopped before a transfer is recorded.
