@@ -2,12 +2,15 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
+const apiClient = fileURLToPath(new URL('./src/api.js', import.meta.url));
+
 export default defineConfig({
     plugins: [react()],
     base: './',
     resolve: {
         alias: {
-            '@AppDeploy/client': fileURLToPath(new URL('./src/api.js', import.meta.url)),
+            '@appdeploy/client': apiClient,
+            '@AppDeploy/client': apiClient,
         },
     },
     build: {
