@@ -37,7 +37,7 @@ export default async function handler(req: any, res: any) {
 
     if (req.method !== 'POST') return json(res, { error: 'Method not allowed' }, 405);
     const body = await readBody(req);
-    const auth = await import('../backend/auth');
+    const auth = await import('../backend/auth.ts');
 
     if (path === 'auth/signup') {
       try { return json(res, await auth.signup(body), 201); } catch (e) { return authError(res, e, 'Unable to create account'); }
