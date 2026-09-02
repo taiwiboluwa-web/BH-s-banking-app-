@@ -1,47 +1,58 @@
 # Tests
 
-## Test 1 - New customer signup, email OTP verification, and protected banking entry [sanity]
+## Test 1 - Create a customer account and verify with email OTP [sanity]
 Viewport: mobile (375x667)
-Covers: customer signup, Neon user persistence, email OTP delivery, five-minute OTP verification, protected banking interface
-Description: Verifies a new tester can create a customer account and enter BH’S only after verifying the emailed code.
+Covers: real customer signup, Neon user persistence, email OTP delivery, five-minute OTP expiry, OTP verification, authenticated entry
+Description: Verifies a new tester can create an account, receive an email verification code, verify it, and enter the protected BH’S interface.
 Steps:
-1. Open BH’S while signed out and choose “Create an account”
-2. Enter a full name, email, phone, password, and confirmation
-3. Submit the signup form
-4. Open the verification email and enter the six-digit OTP
-5. Complete verification
-Expected: The account is created, the OTP is accepted, and the BH’S banking interface opens showing the customer’s name.
+1. Open BH’S while signed out
+2. Select Create an account
+3. Enter a full name, phone number, email address, password and matching confirmation
+4. Select Email as the verification method
+5. Submit the signup form
+6. Open the verification email and enter the 6-digit code within 5 minutes
+Expected: The account is created in Neon, the email OTP is accepted once, and the customer enters the authenticated BH’S interface with their name visible in More.
 
-## Test 2 - Returning customer login and sign out
-Viewport: desktop (1280x800)
-Covers: customer login, persistent session, logout, protected interface
-Description: Verifies an existing verified customer can leave the banking interface and return with the same account.
-Setup:
-1. Complete Test 1 with a verified customer account
-Steps:
-1. Sign out from the More menu
-2. Sign in with the same email and password
-3. Open More
-Expected: The customer returns to the banking interface with their saved name and can sign out again.
-
-## Test 3 - Invalid or expired OTP is rejected
+## Test 2 - Create a customer account and verify with phone OTP
 Viewport: mobile (375x667)
-Covers: OTP validation, five-minute expiry guardrail, single-use verification
-Description: Verifies invalid or expired verification codes cannot create an authenticated session.
-Setup:
-1. Start signup for a new email address and reach the OTP screen
+Covers: phone OTP selection, Termii SMS delivery, five-minute phone OTP expiry, phone verification, authenticated entry
+Description: Verifies the same signup journey can deliver the verification code by SMS instead of email.
 Steps:
-1. Enter an incorrect six-digit code
-2. Observe the error
-3. If the code expires, enter the expired code
-Expected: Incorrect or expired codes do not create a session, and the user is instructed to request a new code.
+1. Open BH’S while signed out
+2. Select Create an account
+3. Enter a full name, phone number, email address, password and matching confirmation
+4. Select SMS as the verification method
+5. Submit the signup form
+6. Enter the 6-digit SMS code within 5 minutes
+Expected: The SMS code is accepted, the phone is marked verified, and the customer enters the authenticated BH’S interface.
 
-## Test 4 - Signup validation blocks unsafe or incomplete credentials
-Viewport: desktop (1280x800)
-Covers: signup validation, password confirmation, required identity details
-Description: Verifies incomplete or inconsistent signup details are rejected before authentication.
+## Test 3 - Reject an invalid or expired OTP without entering the app
+Viewport: mobile (375x667)
+Covers: OTP validation, five-minute expiry guardrail, single-use verification, protected app boundary
+Description: Verifies an incorrect, expired or already-consumed OTP cannot authenticate a customer.
 Steps:
-1. Open Create an account
-2. Submit with an invalid email or a password shorter than eight characters
-3. Submit with mismatched password confirmation
-Expected: Validation messages appear and no authenticated banking session is created.
+1. Start a signup and request an OTP
+2. Enter an incorrect 6-digit code
+Expected: A visible incorrect-code message appears and the account remains outside the banking interface.
+3. Request a fresh code and complete verification
+4. Attempt to reuse the same successful code
+Expected: The reused code is rejected and no second session is created.
+
+## Test 4 - Surface configuration failures instead of a generic 400
+Viewport: desktop (1280x800)
+Covers: signup backend configuration errors, actionable error responses, email/SMS provider boundary
+Description: Verifies missing Neon or OTP delivery configuration is reported as a configuration problem rather than an unexplained request failure.
+QA Faults:
+```json
+[
+  {
+    "method": "POST",
+    "path": "/api/auth/signup",
+    "status": 503,
+    "body_json": { "error": "Email OTP is not configured. Add RESEND_API_KEY in the app secrets." }
+  }
+]
+```
+Steps:
+1. Submit valid signup details while the email provider secret is unavailable
+Expected: The auth screen shows the configuration message instead of only “Request failed with status code 400”.
