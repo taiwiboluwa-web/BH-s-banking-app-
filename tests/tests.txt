@@ -1,74 +1,47 @@
 # Tests
 
-## Test 1 - Complete a sandbox bank transfer [sanity]
+## Test 1 - New customer signup, email OTP verification, and protected banking entry [sanity]
 Viewport: mobile (375x667)
-Covers: home service hub, send-money recipient and amount steps, transfer review, protected backend transfer write, sandbox result, balance update, activity update
-Description: Verifies the primary money-movement journey is fast, explicit and never represents the sandbox as real settlement.
+Covers: customer signup, Neon user persistence, email OTP delivery, five-minute OTP verification, protected banking interface
+Description: Verifies a new tester can create a customer account and enter BH’S only after verifying the emailed code.
 Steps:
-1. Open the BH'S dashboard
-2. Tap Send money
-3. Enter recipient "Ada Nwosu"
-4. Enter amount "25000"
-5. Continue to review and confirm the sandbox transfer
-Expected: A review step shows recipient, amount, currency and sandbox status; after confirmation the result is successful, the balance decreases by ₦25,000, and a new Transfer sent activity entry for Ada Nwosu appears.
+1. Open BH’S while signed out and choose “Create an account”
+2. Enter a full name, email, phone, password, and confirmation
+3. Submit the signup form
+4. Open the verification email and enter the six-digit OTP
+5. Complete verification
+Expected: The account is created, the OTP is accepted, and the BH’S banking interface opens showing the customer’s name.
 
-## Test 2 - Complete Nigerian service requests
-Viewport: mobile (375x667)
-Covers: Airtime, Data, Electricity, TV forms, required-field validation, review/result states, visible Activity records, sandbox provider boundary
-Description: Verifies the four Nigerian service shortcuts are actual interactive flows rather than dead notices.
-Steps:
-1. Open Home and tap Airtime
-2. Enter phone "08012345678", choose MTN, enter "5000", review and confirm
-3. Open Data, enter phone "08012345678", choose Airtel, select a data plan, review and confirm
-4. Open Electricity, choose Ikeja Electric, select Prepaid, enter meter "1234567890", enter "10000", review and confirm
-5. Open TV, choose DStv, enter IUC "1234567890", choose Compact, review and confirm
-Expected: Each service opens a usable form, validates required inputs, shows a review step, then records a processing sandbox transaction in Activity. No provider is charged.
-
-## Test 3 - Use international transfer and multi-currency conversion
-Viewport: mobile (375x667)
-Covers: International transfer form/review/result, destination and recipient capture, multi-currency from/to/amount, conversion preview, Activity records
-Description: Verifies the two previously dead service buttons now open complete sandbox journeys.
-Steps:
-1. Open Home and tap International
-2. Choose United Kingdom, enter recipient "Jane Smith", enter "50000", review and confirm
-3. Tap Multi-currency
-4. Choose NGN to USD, enter "50000", review and confirm
-Expected: Both services open forms with editable fields, show a review step, then a result state and add a visible Activity record marked processing/sandbox.
-
-## Test 4 - Manage wallets and Safe & Spend
+## Test 2 - Returning customer login and sign out
 Viewport: desktop (1280x800)
-Covers: NGN/USD/GBP/EUR wallet views, add/withdraw/convert entry points, Safe & Spend separation
-Description: Verifies the Wallet area presents multi-currency balances and production-shaped wallet controls without claiming live FX settlement.
+Covers: customer login, persistent session, logout, protected interface
+Description: Verifies an existing verified customer can leave the banking interface and return with the same account.
+Setup:
+1. Complete Test 1 with a verified customer account
 Steps:
-1. Select Wallet
-2. Confirm NGN, USD, GBP and EUR wallets are visible
-3. Open Safe & Spend
-4. Select Convert
-Expected: Wallet balances and Safe & Spend controls are visible, and Convert is clearly presented as a sandbox/future-provider action.
+1. Sign out from the More menu
+2. Sign in with the same email and password
+3. Open More
+Expected: The customer returns to the banking interface with their saved name and can sign out again.
 
-## Test 5 - Review cards, activity detail and More security surfaces
-Viewport: desktop (1280x800)
-Covers: virtual card, freeze/unfreeze controls, spending controls, searchable/filterable activity, transaction detail, receipt summary, More/Profile/Security/KYC/Support/Settings
-Description: Verifies the major product surfaces are reachable and useful from the five-area navigation model.
-Steps:
-1. Select Cards
-2. Open Card controls
-3. Select Activity
-4. Search for "Netflix"
-5. Open the Netflix transaction
-6. Open More
-7. Open Security centre
-Expected: Card controls, activity search, transaction detail/receipt summary, and security/profile/KYC/support/settings entry points are visible and navigable without errors.
-
-## Test 6 - Block invalid transfer and show safe failure state
+## Test 3 - Invalid or expired OTP is rejected
 Viewport: mobile (375x667)
-Covers: transfer validation guardrail, insufficient-balance protection, failed-state presentation, invalid-write prevention
-Description: Verifies unsafe or invalid money movement is stopped before a transfer is recorded.
+Covers: OTP validation, five-minute expiry guardrail, single-use verification
+Description: Verifies invalid or expired verification codes cannot create an authenticated session.
+Setup:
+1. Start signup for a new email address and reach the OTP screen
 Steps:
-1. Open Send money
-2. Leave the recipient empty and enter amount "0"
-3. Submit
-Expected: A visible validation message appears, the transfer sheet remains open, and no new transaction is added.
-4. Enter recipient "Test Recipient" and an amount greater than the available NGN balance
-5. Submit
-Expected: A visible insufficient-balance error appears and no transfer is created.
+1. Enter an incorrect six-digit code
+2. Observe the error
+3. If the code expires, enter the expired code
+Expected: Incorrect or expired codes do not create a session, and the user is instructed to request a new code.
+
+## Test 4 - Signup validation blocks unsafe or incomplete credentials
+Viewport: desktop (1280x800)
+Covers: signup validation, password confirmation, required identity details
+Description: Verifies incomplete or inconsistent signup details are rejected before authentication.
+Steps:
+1. Open Create an account
+2. Submit with an invalid email or a password shorter than eight characters
+3. Submit with mismatched password confirmation
+Expected: Validation messages appear and no authenticated banking session is created.
