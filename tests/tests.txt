@@ -1,57 +1,63 @@
 # Tests
 
-## Test 1 - Send a sandbox transfer [sanity]
+## Test 1 - Complete a sandbox bank transfer [sanity]
 Viewport: mobile (375x667)
-Covers: dashboard balance, send-money form, transfer validation, successful sandbox transfer, transaction history update
-Description: Verifies the primary money-movement workflow updates the visible wallet and activity feed without claiming real funds moved.
+Covers: home service hub, send-money recipient and amount steps, transfer review, protected backend transfer write, sandbox result, balance update, activity update
+Description: Verifies the primary money-movement journey is fast, explicit and never represents the sandbox as real settlement.
 Steps:
 1. Open the BH'S dashboard
 2. Tap Send money
 3. Enter recipient "Ada Nwosu"
 4. Enter amount "25000"
-5. Submit the transfer
-Expected: The transfer form closes, a visible success notice states the transfer was created in sandbox mode, the balance decreases by ₦25,000, and a new "Transfer sent" transaction for Ada Nwosu appears.
+5. Continue to review and confirm the sandbox transfer
+Expected: A review step shows recipient, amount, currency and sandbox status; after confirmation the result is successful, the balance decreases by ₦25,000, and a new Transfer sent activity entry for Ada Nwosu appears.
 
-## Test 2 - Switch wallet currency and keep balance masked
-Viewport: desktop (1280x800)
-Covers: multi-currency wallet interaction, balance visibility control, currency switching
-Description: Verifies users can switch between NGN and USD presentation and protect the displayed balance.
-Steps:
-1. Open the BH'S dashboard
-2. Switch the Primary wallet from NGN to USD
-3. Tap the balance visibility control
-Expected: The wallet label changes to USD, the balance is shown in USD formatting, and then the numeric balance is replaced by masked dots.
-
-## Test 3 - Review cards and wallet areas
-Viewport: desktop (1280x800)
-Covers: cards navigation, virtual card presentation, card controls, multi-currency wallet list
-Description: Verifies core banking product areas are reachable from bottom navigation and expose their intended actions.
-Steps:
-1. Open the BH'S dashboard
-2. Select Cards
-3. Confirm the virtual card number and Freeze card action are visible
-4. Select Wallet
-5. Confirm NGN, USD, GBP, and EUR wallets are visible
-Expected: The Cards and Wallet views render without navigation errors and their primary controls are visible.
-
-## Test 4 - Reject invalid transfer input
+## Test 2 - Use the Nigerian service hub
 Viewport: mobile (375x667)
-Covers: send-money validation guardrail, insufficient-balance protection, invalid-write prevention
-Description: Verifies invalid transfer attempts are blocked before creating a transaction.
+Covers: Airtime, Data, Electricity, TV, International and Multi-currency service entry points, thumb-friendly quick actions
+Description: Verifies everyday Nigerian fintech services are discoverable from Home without pretending external billers are connected.
+Steps:
+1. Open Home
+2. Tap Data
+3. Tap Electricity
+4. Tap TV
+5. Tap International
+Expected: Each service opens a clear BH'S flow notice or surface that identifies the feature and, where relevant, states it is sandbox/unavailable until a provider is connected.
+
+## Test 3 - Manage wallets and Safe & Spend
+Viewport: desktop (1280x800)
+Covers: NGN/USD/GBP/EUR wallet views, add/withdraw/convert entry points, Safe & Spend separation
+Description: Verifies the Wallet area presents multi-currency balances and production-shaped wallet controls without claiming live FX settlement.
+Steps:
+1. Select Wallet
+2. Confirm NGN, USD, GBP and EUR wallets are visible
+3. Open Safe & Spend
+4. Select Convert
+Expected: Wallet balances and Safe & Spend controls are visible, and Convert is clearly presented as a sandbox/future-provider action.
+
+## Test 4 - Review cards, activity detail and More security surfaces
+Viewport: desktop (1280x800)
+Covers: virtual card, freeze/unfreeze controls, spending controls, searchable/filterable activity, transaction detail, receipt summary, More/Profile/Security/KYC/Support/Settings
+Description: Verifies the major product surfaces are reachable and useful from the five-area navigation model.
+Steps:
+1. Select Cards
+2. Open Card controls
+3. Select Activity
+4. Search for "Netflix"
+5. Open the Netflix transaction
+6. Open More
+7. Open Security centre
+Expected: Card controls, activity search, transaction detail/receipt summary, and security/profile/KYC/support/settings entry points are visible and navigable without errors.
+
+## Test 5 - Block invalid transfer and show safe failure state
+Viewport: mobile (375x667)
+Covers: transfer validation guardrail, insufficient-balance protection, failed-state presentation, invalid-write prevention
+Description: Verifies unsafe or invalid money movement is stopped before a transfer is recorded.
 Steps:
 1. Open Send money
-2. Leave the recipient empty
-3. Enter amount "0"
-4. Submit the transfer
-Expected: A visible validation message asks for a recipient and valid amount, the sheet remains open, and no new transaction is added.
-
-## Test 5 - Backend transfer endpoint requires authentication
-Viewport: desktop (1280x800)
-Covers: authenticated transaction persistence, protected transfer endpoint
-Description: Verifies the app's server-side transfer storage is protected rather than exposing a public money-writing endpoint.
-Steps:
-1. Open the BH'S app while signed out
-2. Use the visible Send money flow and observe that the UI remains in sandbox mode if backend authentication is unavailable
-3. Sign in using the BH'S authentication control when available
-4. Create a sandbox transfer
-Expected: The user-facing app never presents the protected backend as an unauthenticated real-money service; authenticated transfer writes are stored against the signed-in user's account.
+2. Leave the recipient empty and enter amount "0"
+3. Submit
+Expected: A visible validation message appears, the transfer sheet remains open, and no new transaction is added.
+4. Enter recipient "Test Recipient" and an amount greater than the available NGN balance
+5. Submit
+Expected: A visible insufficient-balance error appears and no transfer is created.
